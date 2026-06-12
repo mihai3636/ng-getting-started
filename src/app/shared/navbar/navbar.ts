@@ -10,7 +10,7 @@ import { RouterLink } from '@angular/router';
     <div class="container">
       <nav class="nav">
         <a class="nav__logo" matButton routerLink="/">
-          <mat-icon>star half</mat-icon>
+          <mat-icon>star_half</mat-icon>
           Logo
         </a>
         <ul class="nav__links">
