@@ -1,0 +1,15 @@
+@use './utils' as *;
+
+:root {
+  // SPACING
+  --sp-0: 0;
+  --sp-1: #{toRem(4px)};
+  --sp-2: #{toRem(8px)};
+  --sp-3: #{toRem(12px)};
+  --sp-4: #{toRem(16px)};
+  --sp-5: #{toRem(24px)};
+  --sp-6: #{toRem(32px)};
+  --sp-7: #{toRem(48px)};
+  --sp-8: #{toRem(64px)};
+  --sp-9: #{toRem(96px)};
+}

@@ -1,0 +1,18 @@
+.section--header {
+  background-color: var(--mat-sys-primary-container);
+}
+
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding-block: var(--sp-3);
+}
+
+.nav__logo {
+}
+
+.nav__links {
+  display: flex;
+}
