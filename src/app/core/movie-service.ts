@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import env from '../../environments/environment';
 import { catchError, map, Observable, startWith, of, delay, throwError, switchMap } from 'rxjs';
-import { TmdbResponse, Movie, MovieState } from './movie.model';
+import { TmdbResponse, MovieState } from './movie.model';
 
 @Injectable({
   providedIn: 'root',
@@ -22,9 +22,9 @@ export class MovieService {
         headers: this.headers,
       })
       .pipe(
-        delay(3000),
+        // delay(3000),
         map((response) => {
-          throw new Error('Something went wrong');
+          // throw new Error('Something went wrong');
           return {
             data: response.results,
             loading: false,
