@@ -24,6 +24,7 @@ export class MovieService {
       .pipe(
         // delay(3000),
         map((response) => {
+          console.log(response);
           // throw new Error('Something went wrong');
           return {
             data: response.results,

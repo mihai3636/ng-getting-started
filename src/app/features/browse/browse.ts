@@ -1,13 +1,11 @@
 import { Component, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MovieService } from '../../core/movie-service';
-
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
+import { MovieCard } from './movie-card';
 
 @Component({
   selector: 'app-browse',
-  imports: [MatCardModule, MatButtonModule],
+  imports: [MovieCard],
   template: `
     <section>
       <div class="container cards">
@@ -20,21 +18,7 @@ import { MatCardModule } from '@angular/material/card';
         }
 
         @for (item of movieState().data; track $index) {
-          <mat-card class="card" appearance="outlined">
-            <img
-              class="card__img"
-              mat-card-image
-              [src]="'https://image.tmdb.org/t/p/w342' + item.poster_path"
-              [alt]="item.title"
-              width="342"
-              height="513"
-            />
-            <mat-card-content>
-              <p class="mat-font-body-lg">
-                {{ item.overview }}
-              </p>
-            </mat-card-content>
-          </mat-card>
+          <app-movie-card [item]="item" />
         }
       </div>
     </section>
@@ -48,19 +32,6 @@ import { MatCardModule } from '@angular/material/card';
       justify-items: center;
 
       padding-block: var(--sp-7);
-    }
-
-    .card {
-      max-width: 342px;
-    }
-
-    .card__img {
-      //   object-fit: cover;
-      //   object-position: top;
-    }
-
-    mat-card-content {
-      padding-top: var(--sp-4);
     }
   `,
 })
