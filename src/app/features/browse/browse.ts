@@ -10,7 +10,15 @@ import { Movie } from '../../core/movie.model';
     <section>
       <div class="container">
         <p>Browse component works!</p>
-        @for (item of movies(); track $index) {
+        @if (movieState().loading) {
+          <p>Movie is loading</p>
+        }
+
+        @if (movieState().error) {
+          <p>{{ movieState().error }}</p>
+        }
+
+        @for (item of movieState().data; track $index) {
           <p>{{ item.title }}</p>
         }
       </div>
@@ -21,10 +29,10 @@ import { Movie } from '../../core/movie.model';
 export class BrowsePageComponent {
   private movieService = inject(MovieService);
 
-  movies = toSignal(this.movieService.getTopRatedMovies(), { initialValue: [] as Movie[] });
+  movieState = toSignal(this.movieService.getTopRatedMovies(), { requireSync: true });
 
   constructor() {
     console.log('BrowserPageComponent constructor called');
-    console.log(this.movies());
+    console.log(this.movieState());
   }
 }

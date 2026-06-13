@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import env from '../../environments/environment';
-import { map, Observable } from 'rxjs';
-import { TmdbResponse, Movie } from './movie.model';
+import { catchError, map, Observable, startWith, of, delay, throwError, switchMap } from 'rxjs';
+import { TmdbResponse, Movie, MovieState } from './movie.model';
 
 @Injectable({
   providedIn: 'root',
@@ -15,12 +15,34 @@ export class MovieService {
   };
   private httpClient = inject(HttpClient);
 
-  getTopRatedMovies(): Observable<Movie[]> {
+  getTopRatedMovies(): Observable<MovieState> {
     console.log(this.headers);
     return this.httpClient
       .get<TmdbResponse>(this.url, {
         headers: this.headers,
       })
-      .pipe(map((response) => response.results));
+      .pipe(
+        delay(3000),
+        map((response) => {
+          throw new Error('Something went wrong');
+          return {
+            data: response.results,
+            loading: false,
+            error: null,
+          };
+        }),
+        startWith({
+          data: [],
+          loading: true,
+          error: null,
+        }),
+        catchError((err) =>
+          of({
+            data: [],
+            loading: false,
+            error: err.message,
+          }),
+        ),
+      );
   }
 }

@@ -12,3 +12,9 @@ export interface Movie {
   vote_average: number;
   overview: string;
 }
+
+export interface MovieState {
+  data: Movie[];
+  loading: Boolean;
+  error: string | null;
+}
