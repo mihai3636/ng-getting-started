@@ -2,15 +2,16 @@ import { Component, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MovieService } from '../../core/movie-service';
 import { MovieCard } from './movie-card';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-browse',
-  imports: [MovieCard],
+  imports: [MovieCard, MatProgressSpinnerModule],
   template: `
     <section>
       <div class="container cards">
         @if (movieState().loading) {
-          <p>Movie is loading</p>
+          <mat-spinner></mat-spinner>
         }
 
         @if (movieState().error) {
@@ -26,7 +27,7 @@ import { MovieCard } from './movie-card';
   styles: `
     .cards {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
       gap: var(--sp-7);
 
       justify-items: center;

@@ -31,7 +31,7 @@ import { Movie } from '../../core/movie.model';
     }
 
     .card {
-      max-width: 342px;
+      max-width: 344px;
     }
 
     mat-card-content {
