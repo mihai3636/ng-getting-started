@@ -3,24 +3,36 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { MovieService } from '../../core/movie-service';
 import { MovieCard } from './movie-card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-browse',
-  imports: [MovieCard, MatProgressSpinnerModule],
+  imports: [MovieCard, MatProgressSpinnerModule, MatPaginatorModule],
   template: `
     <section>
-      <div class="container cards">
-        @if (movieState().loading) {
-          <mat-spinner></mat-spinner>
-        }
+      <div class="container">
+        <mat-paginator
+          [length]="movieState().total_results"
+          [pageSize]="movieState().data.length"
+          [hidePageSize]="false"
+          [showFirstLastButtons]="true"
+          (page)="handlePageEvent($event)"
+          aria-label="Select page"
+        >
+        </mat-paginator>
 
-        @if (movieState().error) {
-          <p>{{ movieState().error }}</p>
-        }
+        <div class="cards">
+          @if (movieState().loading) {
+            <mat-spinner></mat-spinner>
+          }
 
-        @for (item of movieState().data; track $index) {
-          <app-movie-card [item]="item" />
-        }
+          @if (movieState().error) {
+            <p>{{ movieState().error }}</p>
+          }
+          @for (item of movieState().data; track $index) {
+            <app-movie-card [item]="item" />
+          }
+        </div>
       </div>
     </section>
   `,
@@ -34,6 +46,10 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
       padding-block: var(--sp-7);
     }
+
+    mat-paginator {
+      // display: inline-block;
+    }
   `,
 })
 export class BrowsePageComponent {
@@ -44,5 +60,9 @@ export class BrowsePageComponent {
   constructor() {
     console.log('BrowserPageComponent constructor called');
     console.log(this.movieState());
+  }
+
+  handlePageEvent(pageEvent: PageEvent) {
+    console.log(`Page event happened: `, pageEvent);
   }
 }

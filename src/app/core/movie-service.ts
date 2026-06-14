@@ -28,18 +28,27 @@ export class MovieService {
           // throw new Error('Something went wrong');
           return {
             data: response.results,
+            page: response.page,
+            total_pages: response.total_pages,
+            total_results: response.total_results,
             loading: false,
             error: null,
           };
         }),
         startWith({
           data: [],
+          page: 0,
+          total_pages: 0,
+          total_results: 0,
           loading: true,
           error: null,
         }),
         catchError((err) =>
           of({
             data: [],
+            page: 0,
+            total_pages: 0,
+            total_results: 0,
             loading: false,
             error: err.message,
           }),
