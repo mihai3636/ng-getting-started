@@ -1,9 +1,10 @@
-import { Component, inject } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { MovieService } from '../../core/movie-service';
-import { MovieCard } from './movie-card';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { Component, computed, effect, inject, signal } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MovieService } from '../../core/movie-service';
+import { TmdbResponse } from '../../core/movie.model';
+import { MovieCard } from './movie-card';
 
 @Component({
   selector: 'app-browse',
@@ -12,8 +13,8 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
     <section>
       <div class="container">
         <mat-paginator
-          [length]="movieState().total_results"
-          [pageSize]="movieState().data.length"
+          [length]="totalResults()"
+          [pageSize]="pageSize()"
           [hidePageSize]="false"
           [showFirstLastButtons]="true"
           (page)="handlePageEvent($event)"
@@ -22,15 +23,14 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
         </mat-paginator>
 
         <div class="cards">
-          @if (movieState().loading) {
+          @if (uiState.isLoading()) {
             <mat-spinner></mat-spinner>
-          }
-
-          @if (movieState().error) {
-            <p>{{ movieState().error }}</p>
-          }
-          @for (item of movieState().data; track $index) {
-            <app-movie-card [item]="item" />
+          } @else if (uiState.error()) {
+            <p>{{ uiState.error()?.message }}</p>
+          } @else {
+            @for (item of movies(); track item.id) {
+              <app-movie-card [item]="item" />
+            }
           }
         </div>
       </div>
@@ -54,15 +54,30 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 })
 export class BrowsePageComponent {
   private movieService = inject(MovieService);
+  private currentPage = signal(1);
 
-  movieState = toSignal(this.movieService.getTopRatedMovies(), { requireSync: true });
+  protected totalResults = signal(0);
+  protected pageSize = signal(0);
+
+  protected movies = computed(() => this.uiState.value()?.results ?? []);
+
+  uiState = rxResource<TmdbResponse, number>({
+    params: () => this.currentPage(),
+    stream: ({ params }) => this.movieService.getTopRatedMovies(params),
+  });
 
   constructor() {
-    console.log('BrowserPageComponent constructor called');
-    console.log(this.movieState());
+    effect(() => {
+      const value = this.uiState.value();
+      if (value) {
+        this.totalResults.set(Math.min(value.total_results, 10000));
+        this.pageSize.set(value.results.length);
+      }
+    });
   }
 
   handlePageEvent(pageEvent: PageEvent) {
-    console.log(`Page event happened: `, pageEvent);
+    let newPage = pageEvent.pageIndex + 1;
+    this.currentPage.set(newPage);
   }
 }

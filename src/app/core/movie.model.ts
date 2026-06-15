@@ -12,12 +12,3 @@ export interface Movie {
   vote_average: number;
   overview: string;
 }
-
-export interface MovieState {
-  data: Movie[];
-  page: number;
-  total_pages: number;
-  total_results: number;
-  loading: Boolean;
-  error: string | null;
-}

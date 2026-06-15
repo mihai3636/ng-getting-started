@@ -1,58 +1,26 @@
-import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { inject, Injectable } from '@angular/core';
+import { delay } from 'rxjs';
 import env from '../../environments/environment';
-import { catchError, map, Observable, startWith, of, delay, throwError, switchMap } from 'rxjs';
-import { TmdbResponse, MovieState } from './movie.model';
+import { TmdbResponse } from './movie.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class MovieService {
-  private readonly url = 'https://api.themoviedb.org/3/movie/top_rated?language=en-US&page=1';
+  private readonly url = 'https://api.themoviedb.org/3/movie/top_rated?language=en-US';
   private headers = {
     accept: 'application/json',
     Authorization: `Bearer ${env.tmdbReadToken}`,
   };
   private httpClient = inject(HttpClient);
 
-  getTopRatedMovies(): Observable<MovieState> {
-    console.log(this.headers);
+  getTopRatedMovies(page: number) {
+    console.log(`getTopRatedMovies(${page})`);
+    let urlWithPageParam = `${this.url}&page=${page}`;
+
     return this.httpClient
-      .get<TmdbResponse>(this.url, {
-        headers: this.headers,
-      })
-      .pipe(
-        // delay(3000),
-        map((response) => {
-          console.log(response);
-          // throw new Error('Something went wrong');
-          return {
-            data: response.results,
-            page: response.page,
-            total_pages: response.total_pages,
-            total_results: response.total_results,
-            loading: false,
-            error: null,
-          };
-        }),
-        startWith({
-          data: [],
-          page: 0,
-          total_pages: 0,
-          total_results: 0,
-          loading: true,
-          error: null,
-        }),
-        catchError((err) =>
-          of({
-            data: [],
-            page: 0,
-            total_pages: 0,
-            total_results: 0,
-            loading: false,
-            error: err.message,
-          }),
-        ),
-      );
+      .get<TmdbResponse>(urlWithPageParam, { headers: this.headers })
+      .pipe(delay(200));
   }
 }
