@@ -19,8 +19,9 @@ export class MovieService {
     console.log(`getTopRatedMovies(${page})`);
     let urlWithPageParam = `${this.url}&page=${page}`;
 
-    return this.httpClient
-      .get<TmdbResponse>(urlWithPageParam, { headers: this.headers })
-      .pipe(delay(200));
+    return this.httpClient.get<TmdbResponse>(urlWithPageParam, { headers: this.headers }).pipe(
+      delay(2000),
+      // switchMap(() => throwError(() => new Error('Simulated error'))),
+    );
   }
 }

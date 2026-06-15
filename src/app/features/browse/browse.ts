@@ -1,9 +1,9 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, effect, inject, ResourceRef, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MovieService } from '../../core/movie-service';
-import { TmdbResponse } from '../../core/movie.model';
+import { Movie, TmdbResponse } from '../../core/movie.model';
 import { MovieCard } from './movie-card';
 
 @Component({
@@ -22,22 +22,27 @@ import { MovieCard } from './movie-card';
         >
         </mat-paginator>
 
+        @if (uiState.error()) {
+          <p>{{ uiState.error()?.message }}</p>
+        }
+
         <div class="cards">
-          @if (uiState.isLoading()) {
-            <mat-spinner></mat-spinner>
-          } @else if (uiState.error()) {
-            <p>{{ uiState.error()?.message }}</p>
-          } @else {
-            @for (item of movies(); track item.id) {
-              <app-movie-card [item]="item" />
-            }
+          @for (item of movies(); track item.id) {
+            <app-movie-card [item]="item" />
           }
         </div>
+
+        @if (uiState.isLoading()) {
+          <div class="overlay">
+            <mat-spinner class="spinner"></mat-spinner>
+          </div>
+        }
       </div>
     </section>
   `,
   styles: `
     .cards {
+      position: relative;
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
       gap: var(--sp-7);
@@ -47,8 +52,14 @@ import { MovieCard } from './movie-card';
       padding-block: var(--sp-7);
     }
 
-    mat-paginator {
-      // display: inline-block;
+    .overlay {
+      z-index: 100;
+      position: fixed;
+      inset: 0;
+
+      display: grid;
+      place-content: center;
+      background: color-mix(in srgb, var(--mat-sys-surface) 60%, transparent);
     }
   `,
 })
@@ -58,26 +69,30 @@ export class BrowsePageComponent {
 
   protected totalResults = signal(0);
   protected pageSize = signal(0);
+  protected movies = signal<Movie[]>([]);
 
-  protected movies = computed(() => this.uiState.value()?.results ?? []);
-
-  uiState = rxResource<TmdbResponse, number>({
+  uiState: ResourceRef<TmdbResponse | undefined> = rxResource<TmdbResponse, number>({
     params: () => this.currentPage(),
     stream: ({ params }) => this.movieService.getTopRatedMovies(params),
   });
 
   constructor() {
     effect(() => {
-      const value = this.uiState.value();
-      if (value) {
-        this.totalResults.set(Math.min(value.total_results, 10000));
-        this.pageSize.set(value.results.length);
+      if (!this.uiState.hasValue()) {
+        console.log(`Effect has no value`);
+        return;
       }
+
+      const value = this.uiState.value();
+      console.log('Effect changed: ', value);
+
+      this.totalResults.set(Math.min(value.total_results, 10100));
+      this.pageSize.set(value.results.length);
+      this.movies.set(value.results);
     });
   }
 
   handlePageEvent(pageEvent: PageEvent) {
-    let newPage = pageEvent.pageIndex + 1;
-    this.currentPage.set(newPage);
+    this.currentPage.set(pageEvent.pageIndex + 1);
   }
 }
