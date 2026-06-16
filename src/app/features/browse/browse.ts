@@ -33,14 +33,17 @@ import { MovieCard } from './movie-card';
         </div>
 
         @if (uiState.isLoading()) {
-          <div class="overlay">
-            <mat-spinner class="spinner"></mat-spinner>
-          </div>
+          <div class="section__overlay"></div>
+          <mat-spinner class="spinner"></mat-spinner>
         }
       </div>
     </section>
   `,
   styles: `
+    section {
+      position: relative;
+    }
+
     .cards {
       position: relative;
       display: grid;
@@ -52,14 +55,19 @@ import { MovieCard } from './movie-card';
       padding-block: var(--sp-7);
     }
 
-    .overlay {
+    .section__overlay {
       z-index: 100;
-      position: fixed;
+      position: absolute;
       inset: 0;
-
-      display: grid;
-      place-content: center;
       background: color-mix(in srgb, var(--mat-sys-surface) 60%, transparent);
+    }
+
+    .spinner {
+      position: fixed;
+      z-index: 200;
+      top: 50%;
+      left: 50%;
+      transform: trnaslateY(-50%) translateX(-50%);
     }
   `,
 })

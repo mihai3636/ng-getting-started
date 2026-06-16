@@ -20,7 +20,7 @@ export class MovieService {
     let urlWithPageParam = `${this.url}&page=${page}`;
 
     return this.httpClient.get<TmdbResponse>(urlWithPageParam, { headers: this.headers }).pipe(
-      delay(2000),
+      delay(200),
       // switchMap(() => throwError(() => new Error('Simulated error'))),
     );
   }
