@@ -1,8 +1,10 @@
 import { Component, effect, inject, ResourceRef, signal } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { MatCardModule } from '@angular/material/card';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { ActivatedRoute, Router } from '@angular/router';
+import { map } from 'rxjs';
 import { MovieService } from '../../core/movie-service';
 import { Movie, TmdbResponse } from '../../core/movie.model';
 import { MovieCard } from './movie-card';
@@ -16,6 +18,7 @@ import { MovieCard } from './movie-card';
         <mat-paginator
           [length]="totalResults()"
           [pageSize]="pageSize()"
+          [pageIndex]="currentPage() - 1"
           [hidePageSize]="false"
           [showFirstLastButtons]="true"
           (page)="handlePageEvent($event)"
@@ -84,8 +87,15 @@ import { MovieCard } from './movie-card';
   `,
 })
 export class BrowsePageComponent {
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private movieService = inject(MovieService);
-  private currentPage = signal(1);
+
+  private pageParam$ = this.route.queryParamMap.pipe(
+    map((params) => Math.max(1, Number(params.get('page')))),
+  );
+
+  protected currentPage = toSignal(this.pageParam$, { requireSync: true });
 
   protected totalResults = signal(0);
   protected pageSize = signal(0);
@@ -119,6 +129,9 @@ export class BrowsePageComponent {
   }
 
   handlePageEvent(pageEvent: PageEvent) {
-    this.currentPage.set(pageEvent.pageIndex + 1);
+    this.router.navigate([], {
+      queryParams: { page: pageEvent.pageIndex + 1 },
+      queryParamsHandling: 'merge',
+    });
   }
 }
