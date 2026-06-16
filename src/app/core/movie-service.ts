@@ -28,6 +28,6 @@ export class MovieService {
 
   searchMovies(query: string, page: number) {
     const searchUrl = `${this.url}/search/movie?language=en-US&query=${encodeURIComponent(query)}&page=${page}`;
-    return this.httpClient.get<TmdbResponse>(this.url, { headers: this.headers });
+    return this.httpClient.get<TmdbResponse>(searchUrl, { headers: this.headers });
   }
 }

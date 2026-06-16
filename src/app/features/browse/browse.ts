@@ -4,7 +4,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ActivatedRoute, Router } from '@angular/router';
-import { map } from 'rxjs';
+import { map, tap } from 'rxjs';
 import { MovieService } from '../../core/movie-service';
 import { Movie, TmdbResponse } from '../../core/movie.model';
 import { MovieCard } from './movie-card';
@@ -92,18 +92,27 @@ export class BrowsePageComponent {
   private movieService = inject(MovieService);
 
   private pageParam$ = this.route.queryParamMap.pipe(
+    tap((params) =>
+      console.log(`tapping on page param`, Number(params.get('page')), params.get('page')),
+    ),
     map((params) => Math.max(1, Number(params.get('page')))),
   );
 
+  private queryParam$ = this.route.queryParamMap.pipe(map((params) => params.get('q') ?? ''));
+
   protected currentPage = toSignal(this.pageParam$, { requireSync: true });
+  protected currentQuery = toSignal(this.queryParam$, { requireSync: true });
 
   protected totalResults = signal(0);
   protected pageSize = signal(0);
   protected movies = signal<Movie[]>([]);
 
-  uiState: ResourceRef<TmdbResponse | undefined> = rxResource<TmdbResponse, number>({
-    params: () => this.currentPage(),
-    stream: ({ params }) => this.movieService.getTopRatedMovies(params),
+  uiState: ResourceRef<TmdbResponse | undefined> = rxResource({
+    params: () => ({ page: this.currentPage(), query: this.currentQuery() }),
+    stream: ({ params }) =>
+      params.query
+        ? this.movieService.searchMovies(params.query, params.page)
+        : this.movieService.getTopRatedMovies(params.page),
   });
 
   constructor() {
@@ -115,6 +124,8 @@ export class BrowsePageComponent {
 
       const value = this.uiState.value();
       console.log('Effect changed: ', value);
+
+      if (!value) return;
 
       this.totalResults.set(Math.min(value.total_results, 10100));
       this.pageSize.set(value.results.length);
