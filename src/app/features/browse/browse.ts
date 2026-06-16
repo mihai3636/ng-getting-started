@@ -1,5 +1,6 @@
 import { Component, effect, inject, ResourceRef, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { MatCardModule } from '@angular/material/card';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MovieService } from '../../core/movie-service';
@@ -8,7 +9,7 @@ import { MovieCard } from './movie-card';
 
 @Component({
   selector: 'app-browse',
-  imports: [MovieCard, MatProgressSpinnerModule, MatPaginatorModule],
+  imports: [MovieCard, MatProgressSpinnerModule, MatPaginatorModule, MatCardModule],
   template: `
     <section>
       <div class="container">
@@ -23,7 +24,14 @@ import { MovieCard } from './movie-card';
         </mat-paginator>
 
         @if (uiState.error()) {
-          <p>{{ uiState.error()?.message }}</p>
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title>Error</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <p>{{ uiState.error()?.message }}</p>
+            </mat-card-content>
+          </mat-card>
         }
 
         <div class="cards">
@@ -69,6 +77,10 @@ import { MovieCard } from './movie-card';
       left: 50%;
       transform: trnaslateY(-50%) translateX(-50%);
     }
+
+    mat-card-content {
+      padding-top: var(--sp-2);
+    }
   `,
 })
 export class BrowsePageComponent {
@@ -97,6 +109,12 @@ export class BrowsePageComponent {
       this.totalResults.set(Math.min(value.total_results, 10100));
       this.pageSize.set(value.results.length);
       this.movies.set(value.results);
+    });
+
+    effect(() => {
+      if (this.uiState.error()) {
+        this.movies.set([]);
+      }
     });
   }
 
