@@ -78,7 +78,7 @@ import { MovieCard } from './movie-card';
       z-index: 200;
       top: 50%;
       left: 50%;
-      transform: trnaslateY(-50%) translateX(-50%);
+      transform: translateY(-50%) translateX(-50%);
     }
 
     mat-card-content {
