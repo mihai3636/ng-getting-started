@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
 
 @Component({
@@ -18,7 +18,7 @@ import { RouterLink } from '@angular/router';
             <a matButton routerLink="/">Home</a>
           </li>
           <li>
-            <a matButton routerLink="/browse">Browse</a>
+            <a matButton routerLink="/browse" [queryParams]="{ page: 1, q: '' }">Browse</a>
           </li>
           <li>
             <a matButton routerLink="/">Top Rated</a>

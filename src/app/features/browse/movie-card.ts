@@ -1,11 +1,12 @@
 import { Component, input } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { RouterLink } from '@angular/router';
 import { Movie } from '../../core/movie.model';
 
 @Component({
   selector: 'app-movie-card',
-  imports: [MatCardModule, MatButtonModule],
+  imports: [MatCardModule, MatButtonModule, RouterLink],
   template: `
     <mat-card class="card" appearance="outlined">
       <img
@@ -21,7 +22,7 @@ import { Movie } from '../../core/movie.model';
         </p>
       </mat-card-content>
       <mat-card-actions align="end">
-        <a href="#" matButton>More info</a>
+        <a [routerLink]="['/movie', item().id]" matButton>More info</a>
       </mat-card-actions>
     </mat-card>
   `,
