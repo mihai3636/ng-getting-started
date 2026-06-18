@@ -6,3 +6,7 @@
 
 .section {
 }
+
+.flow-content > * + * {
+  margin-top: var(--flow-spacer, var(--sp-3));
+}
