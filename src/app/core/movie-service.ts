@@ -1,7 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
+import { delay } from 'rxjs';
 import env from '../../environments/environment';
-import { TmdbResponse } from './movie.model';
+import { MovieDetails, TmdbResponse } from './movie.model';
 
 @Injectable({
   providedIn: 'root',
@@ -28,5 +29,13 @@ export class MovieService {
 
     const searchUrl = `${this.url}/search/movie?language=en-US&query=${encodeURIComponent(query)}&page=${page}`;
     return this.httpClient.get<TmdbResponse>(searchUrl, { headers: this.headers });
+  }
+
+  getMovieDetails(id: number) {
+    let urlWithId = `${this.url}/movie/${id}?language=en-US`;
+    return this.httpClient.get<MovieDetails>(urlWithId, { headers: this.headers }).pipe(
+      delay(1000),
+      // switchMap(() => throwError(() => new Error('Simulated error'))),
+    );
   }
 }
