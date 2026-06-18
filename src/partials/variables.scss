@@ -1,5 +1,8 @@
 @use './utils' as *;
 
+$bp-tablet: #{toRem(768px)};
+$bp-desktop: #{toRem(1000px)};
+
 :root {
   // SPACING
   --sp-0: 0;

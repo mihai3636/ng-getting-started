@@ -1,30 +1,59 @@
 import { Component, effect, inject, ResourceRef, signal } from '@angular/core';
-import { rxResource, toSignal } from '@angular/core/rxjs-interop';
+import { rxResource, toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { FormsModule } from '@angular/forms';
+import { form, FormField } from '@angular/forms/signals';
 import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIcon } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ActivatedRoute, Router } from '@angular/router';
-import { map, tap } from 'rxjs';
+import { debounceTime, map, tap } from 'rxjs';
 import { MovieService } from '../../core/movie-service';
 import { Movie, TmdbResponse } from '../../core/movie.model';
 import { MovieCard } from './movie-card';
 
+interface SearchData {
+  query: string;
+}
+
 @Component({
   selector: 'app-browse',
-  imports: [MovieCard, MatProgressSpinnerModule, MatPaginatorModule, MatCardModule],
+  imports: [
+    MovieCard,
+    MatProgressSpinnerModule,
+    MatPaginatorModule,
+    MatCardModule,
+    FormField,
+    FormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatIcon,
+  ],
   template: `
     <section>
       <div class="container">
-        <mat-paginator
-          [length]="totalResults()"
-          [pageSize]="pageSize()"
-          [pageIndex]="currentPage() - 1"
-          [hidePageSize]="false"
-          [showFirstLastButtons]="true"
-          (page)="handlePageEvent($event)"
-          aria-label="Select page"
-        >
-        </mat-paginator>
+        <div class="header">
+          <form action="#">
+            <mat-form-field>
+              <mat-label>Search</mat-label>
+              <input matInput type="text" [formField]="searchForm.query" />
+              <mat-icon matSuffix>search</mat-icon>
+            </mat-form-field>
+          </form>
+
+          <mat-paginator
+            [length]="totalResults()"
+            [pageSize]="pageSize()"
+            [pageIndex]="currentPage() - 1"
+            [hidePageSize]="false"
+            [showFirstLastButtons]="true"
+            (page)="handlePageEvent($event)"
+            aria-label="Select page"
+          >
+          </mat-paginator>
+        </div>
 
         @if (uiState.error()) {
           <mat-card>
@@ -51,8 +80,22 @@ import { MovieCard } from './movie-card';
     </section>
   `,
   styles: `
+    @use '../../../partials/variables' as *;
     section {
       position: relative;
+    }
+
+    .container {
+      padding-top: var(--sp-5);
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    mat-form-field {
+      min-width: 500px;
     }
 
     .cards {
@@ -62,6 +105,10 @@ import { MovieCard } from './movie-card';
       gap: var(--sp-7);
 
       justify-items: center;
+
+      // @media (min-width: $bp-tablet) {
+      //   justify-items: start;
+      // }
 
       padding-block: var(--sp-7);
     }
@@ -98,7 +145,10 @@ export class BrowsePageComponent {
     map((params) => Math.max(1, Number(params.get('page')))),
   );
 
-  private queryParam$ = this.route.queryParamMap.pipe(map((params) => params.get('q') ?? ''));
+  private queryParam$ = this.route.queryParamMap.pipe(
+    tap((params) => console.log(`tapping on query param`, params.get('q'))),
+    map((params) => params.get('q') ?? ''),
+  );
 
   protected currentPage = toSignal(this.pageParam$, { requireSync: true });
   protected currentQuery = toSignal(this.queryParam$, { requireSync: true });
@@ -106,6 +156,15 @@ export class BrowsePageComponent {
   protected totalResults = signal(0);
   protected pageSize = signal(0);
   protected movies = signal<Movie[]>([]);
+
+  readonly searchModel = signal<SearchData>({
+    query: '',
+  });
+
+  readonly searchForm = form(this.searchModel);
+
+  private formQuery$ = toObservable(this.searchForm.query().value).pipe(debounceTime(500));
+  private formQuery = toSignal(this.formQuery$, { initialValue: '' });
 
   uiState: ResourceRef<TmdbResponse | undefined> = rxResource({
     params: () => ({ page: this.currentPage(), query: this.currentQuery() }),
@@ -136,6 +195,15 @@ export class BrowsePageComponent {
       if (this.uiState.error()) {
         this.movies.set([]);
       }
+    });
+
+    effect(() => {
+      console.log(`Effect formQuery(): `, this.formQuery());
+
+      this.router.navigate([], {
+        queryParams: { page: 1, q: this.formQuery() },
+        queryParamsHandling: 'merge',
+      });
     });
   }
 
