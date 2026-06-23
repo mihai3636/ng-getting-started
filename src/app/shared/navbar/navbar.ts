@@ -15,7 +15,7 @@ import { RouterLink } from '@angular/router';
         </a>
         <ul class="nav__links">
           <li>
-            <a matButton routerLink="/">Home</a>
+            <a matButton routerLink="/home">Home</a>
           </li>
           <li>
             <a matButton routerLink="/browse" [queryParams]="{ page: 1, q: '' }">Browse</a>

@@ -11,7 +11,18 @@ import { NavbarComponent } from './shared/navbar/navbar';
       <router-outlet />
     </main>
   `,
-  styleUrl: './app.scss',
+  styles: `
+    // main {
+    //   min-height: 100vh;
+
+    //   display: grid;
+    //   grid-template-rows: auto 1fr;
+    // }
+
+    // router-outlet {
+    //   display: none;
+    // }
+  `,
 })
 export class App {
   protected readonly title = signal('getting-started');
