@@ -1,4 +1,5 @@
 import { Service, signal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import {
   getAuth,
   onAuthStateChanged,
@@ -6,7 +7,7 @@ import {
   signOut,
   User,
 } from 'firebase/auth';
-import { from } from 'rxjs';
+import { filter, from, map, Observable, take } from 'rxjs';
 
 @Service()
 export class Auth {
@@ -32,5 +33,13 @@ export class Auth {
 
   logOut() {
     return from(signOut(this.auth));
+  }
+
+  whenReady(): Observable<void> {
+    return toObservable(this.authReady).pipe(
+      filter((ready) => ready),
+      take(1),
+      map(() => undefined),
+    );
   }
 }

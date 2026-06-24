@@ -1,7 +1,5 @@
 import { inject } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
 import { CanActivateFn, Router } from '@angular/router';
-import { filter, map, take } from 'rxjs';
 import { Auth } from './auth';
 
 export const authGuard: CanActivateFn = () => {
@@ -10,14 +8,17 @@ export const authGuard: CanActivateFn = () => {
 
   console.log(`authGuard checking currentUser: `, auth.currentUser());
 
-  return toObservable(auth.authReady).pipe(
-    filter((isReady) => isReady),
-    take(1),
-    map(() => {
-      if (auth.currentUser()) return true;
-      return router.createUrlTree(['/login']);
-    }),
-  );
+  if (auth.currentUser()) return true;
+  return router.createUrlTree(['/login']);
+
+  //   return toObservable(auth.authReady).pipe(
+  //     filter((isReady) => isReady),
+  //     take(1),
+  //     map(() => {
+  //       if (auth.currentUser()) return true;
+  //       return router.createUrlTree(['/login']);
+  //     }),
+  //   );
 };
 
 export const authReverseGuard: CanActivateFn = () => {
@@ -26,15 +27,19 @@ export const authReverseGuard: CanActivateFn = () => {
 
   console.log(`authReverseGuard checking currentUser: `, auth.currentUser());
 
-  return toObservable(auth.authReady).pipe(
-    filter((isReady) => isReady),
-    take(1),
-    map(() => {
-      if (!auth.currentUser()) return true;
+  if (!auth.currentUser()) return true;
 
-      return router.createUrlTree(['/home']);
-    }),
-  );
+  return router.createUrlTree(['/home']);
+
+  //   return toObservable(auth.authReady).pipe(
+  //     filter((isReady) => isReady),
+  //     take(1),
+  //     map(() => {
+  //       if (!auth.currentUser()) return true;
+
+  //       return router.createUrlTree(['/home']);
+  //     }),
+  //   );
 
   //   if (!auth.currentUser()) {
   //     return true;
