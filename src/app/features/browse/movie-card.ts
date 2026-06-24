@@ -2,7 +2,7 @@ import { Component, input } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { RouterLink } from '@angular/router';
-import { Movie } from '../../core/movie.model';
+import { Movie } from '../../core/movies/movie.model';
 
 @Component({
   selector: 'app-movie-card',

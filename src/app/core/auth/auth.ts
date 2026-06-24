@@ -15,8 +15,13 @@ export class Auth {
   private currentUserSignal = signal<User | null>(null);
   currentUser = this.currentUserSignal.asReadonly();
 
+  private authReadySignal = signal(false);
+  authReady = this.authReadySignal.asReadonly();
+
   constructor() {
     onAuthStateChanged(this.auth, (user) => {
+      console.log(`onAuthStateChanged: `, user);
+      this.authReadySignal.set(true);
       this.currentUserSignal.set(user);
     });
   }

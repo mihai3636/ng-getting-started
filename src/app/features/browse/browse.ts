@@ -10,8 +10,8 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ActivatedRoute, Router } from '@angular/router';
 import { debounceTime, map, tap } from 'rxjs';
-import { MovieService } from '../../core/movie-service';
-import { Movie, TmdbResponse } from '../../core/movie.model';
+import { MovieService } from '../../core/movies/movie-service';
+import { Movie, TmdbResponse } from '../../core/movies/movie.model';
 import { MovieCard } from './movie-card';
 
 interface SearchData {

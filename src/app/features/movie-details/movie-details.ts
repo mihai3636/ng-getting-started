@@ -6,8 +6,8 @@ import { MatIcon } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ActivatedRoute } from '@angular/router';
 import { map } from 'rxjs';
-import { MovieService } from '../../core/movie-service';
-import { MovieDetails } from '../../core/movie.model';
+import { MovieService } from '../../core/movies/movie-service';
+import { MovieDetails } from '../../core/movies/movie.model';
 
 @Component({
   selector: 'app-movie-details',

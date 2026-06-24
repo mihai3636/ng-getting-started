@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { delay } from 'rxjs';
-import env from '../../environments/environment';
+import env from '../../../environments/environment';
 import { MovieDetails, TmdbResponse } from './movie.model';
 
 @Injectable({

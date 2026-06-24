@@ -5,9 +5,10 @@ import { MatButton } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { Router } from '@angular/router';
 import { FirebaseError } from 'firebase/app';
-import { Auth } from '../../core/auth';
-import { LoginData } from '../../core/login.model';
+import { Auth } from '../../core/auth/auth';
+import { LoginData } from '../../core/auth/login.model';
 
 @Component({
   selector: 'app-auth',
@@ -102,6 +103,7 @@ import { LoginData } from '../../core/login.model';
   `,
 })
 export default class AuthPage {
+  private readonly router = inject(Router);
   private readonly authService = inject(Auth);
   readonly authError = signal('');
 
@@ -143,6 +145,7 @@ export default class AuthPage {
     this.authService.signIn(email, password).subscribe({
       next: (userCredential) => {
         console.log(`Sign in SUCCESS`, userCredential);
+        this.router.navigate(['/home']);
       },
       error: (err) => {
         if (!(err instanceof FirebaseError)) {
