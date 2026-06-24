@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { Auth } from '../../core/auth/auth';
 
 @Component({
   selector: 'app-navbar',
@@ -13,26 +14,48 @@ import { RouterLink } from '@angular/router';
           <mat-icon>star_half</mat-icon>
           Logo
         </a>
-        <ul class="nav__links">
-          <li>
-            <a matButton routerLink="/home">Home</a>
-          </li>
-          <li>
-            <a matButton routerLink="/browse" [queryParams]="{ page: 1, q: '' }">Browse</a>
-          </li>
-          <li>
-            <a matButton routerLink="/">Top Rated</a>
-          </li>
-          <li>
-            <a matButton routerLink="/">Watchlist</a>
-          </li>
-          <li>
-            <a matButton routerLink="/">About</a>
-          </li>
-        </ul>
+
+        @if (authService.currentUser()) {
+          <ul class="nav__links">
+            <li>
+              <a matButton routerLink="/home">Home</a>
+            </li>
+            <li>
+              <a matButton routerLink="/browse" [queryParams]="{ page: 1, q: '' }">Browse</a>
+            </li>
+            <li>
+              <a matButton routerLink="/">Top Rated</a>
+            </li>
+            <li>
+              <a matButton routerLink="/">Watchlist</a>
+            </li>
+            <li>
+              <a matButton routerLink="/">About</a>
+            </li>
+            <li>
+              <button matButton (click)="logOut()">Log out</button>
+            </li>
+          </ul>
+        }
       </nav>
     </div>
   </section>`,
   styleUrl: './navbar.scss',
 })
-export class NavbarComponent {}
+export class NavbarComponent {
+  protected readonly authService = inject(Auth);
+  private readonly router = inject(Router);
+
+  logOut() {
+    console.log(`Logout clicked`);
+    this.authService.logOut().subscribe({
+      next: () => {
+        this.router.navigate(['/login']);
+        console.log(`Logout success`);
+      },
+      error: (err) => {
+        console.log(`authService.logOut something went wrong`, err.message);
+      },
+    });
+  }
+}
