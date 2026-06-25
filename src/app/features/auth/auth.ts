@@ -100,6 +100,14 @@ import { LoginData } from '../../core/auth/login.model';
     .form__email {
       --flow-spacer: var(--sp-6);
     }
+
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus {
+      -webkit-box-shadow: 0 0 0 1000px var(--mat-sys-surface-container-low) inset;
+      -webkit-text-fill-color: var(--mat-sys-on-surface);
+      transition: background-color 5000s ease-in-out 0s;
+    }
   `,
 })
 export default class AuthPage {
