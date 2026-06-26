@@ -113,21 +113,6 @@ interface SearchData {
       padding-block: var(--sp-7);
     }
 
-    .section__overlay {
-      z-index: 100;
-      position: absolute;
-      inset: 0;
-      background: color-mix(in srgb, var(--mat-sys-surface) 60%, transparent);
-    }
-
-    .spinner {
-      position: fixed;
-      z-index: 200;
-      top: 50%;
-      left: 50%;
-      transform: translateY(-50%) translateX(-50%);
-    }
-
     mat-card-content {
       padding-top: var(--sp-2);
     }

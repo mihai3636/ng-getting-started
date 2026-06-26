@@ -77,6 +77,7 @@ import { Auth } from '../../core/auth/auth';
 
     .nav__links {
       position: fixed;
+      z-index: 200;
       inset: 0;
       left: 40%;
       background-color: var(--mat-sys-primary-container);
@@ -106,6 +107,8 @@ import { Auth } from '../../core/auth/auth';
     }
 
     .menu {
+      position: relative;
+      z-index: 300;
       @media (min-width: $bp-desktop) {
         display: none;
       }
