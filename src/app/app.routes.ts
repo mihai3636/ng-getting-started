@@ -11,6 +11,11 @@ export const routes: Routes = [
     pathMatch: 'full',
   },
   {
+    path: 'login',
+    component: AuthPage,
+    canActivate: [authReverseGuard],
+  },
+  {
     path: 'home',
     component: HomePageComponent,
     canActivate: [authGuard],
@@ -26,9 +31,9 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
-    path: 'login',
-    component: AuthPage,
-    canActivate: [authReverseGuard],
+    path: 'profile',
+    loadComponent: () => import('./features/profile/profile'),
+    canActivate: [authGuard],
   },
   {
     path: '**',

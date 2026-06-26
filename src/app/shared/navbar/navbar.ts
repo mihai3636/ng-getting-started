@@ -23,14 +23,14 @@ import { Auth } from '../../core/auth/auth';
             <li>
               <a matButton routerLink="/browse" [queryParams]="{ page: 1, q: '' }">Browse</a>
             </li>
-            <li>
+            <!-- <li>
               <a matButton routerLink="/">Top Rated</a>
             </li>
             <li>
               <a matButton routerLink="/">Watchlist</a>
-            </li>
+            </li> -->
             <li>
-              <a matButton routerLink="/">About</a>
+              <a matButton routerLink="/profile">Profile</a>
             </li>
             <li>
               <button matButton (click)="logOut()">Log out</button>
