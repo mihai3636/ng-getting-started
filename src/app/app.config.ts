@@ -11,6 +11,7 @@ import { routes } from './app.routes';
 
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
 import environment from '../environments/environment';
 import { Auth } from './core/auth/auth';
 
@@ -30,3 +31,4 @@ const app = initializeApp(environment.firebaseConfig);
 
 // Initialize Firebase Authentication and get a reference to the service
 const auth = getAuth(app);
+const firestore = getFirestore(app);

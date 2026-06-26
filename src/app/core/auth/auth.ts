@@ -35,6 +35,13 @@ export class Auth {
     return from(signOut(this.auth));
   }
 
+  getUserEmail(): string {
+    const email = this.currentUser()?.email;
+    if (!email) throw new Error('User is not authenticated');
+
+    return email;
+  }
+
   whenReady(): Observable<void> {
     return toObservable(this.authReady).pipe(
       filter((ready) => ready),
