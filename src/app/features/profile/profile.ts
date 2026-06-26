@@ -5,4 +5,4 @@ import { Component } from '@angular/core';
   template: `<p>It works!</p>`,
   styles: ``,
 })
-export default class ProfileComponent {}
+export default class ProfilePageComponent {}
