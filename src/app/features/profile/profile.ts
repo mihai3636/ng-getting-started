@@ -8,8 +8,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { FirestoreService } from '../../core/firestore/firestore';
-import { UserProfileData } from './userProfile.model';
+import { FirestoreService, UserProfileDoc } from '../../core/firestore/firestore';
+import { UserProfileForm } from './userProfile.model';
 
 @Component({
   selector: 'app-profile',
@@ -79,7 +79,7 @@ export default class ProfilePageComponent {
     },
   });
 
-  readonly userProfileModel = signal<UserProfileData>({
+  readonly userProfileModel = signal<UserProfileForm>({
     email: '',
     displayName: '',
     favoriteMovie: '',
@@ -102,17 +102,7 @@ export default class ProfilePageComponent {
 
       if (!value) return;
 
-      if (value.exists()) {
-        console.log(`Value exists`);
-        this.userProfileModel.set({
-          email: value.data()['email'] ?? '',
-          displayName: value.data()['displayName'] ?? '',
-          favoriteMovie: value.data()['favoriteMovie'] ?? '',
-        });
-      } else {
-        console.log(`Value did not exist`);
-        this.userProfileForm.email().value.set('g@g.com');
-      }
+      this.userProfileModel.set(toFormModel(value));
     });
 
     effect(() => {
@@ -129,21 +119,36 @@ export default class ProfilePageComponent {
   }
 
   onSubmit() {
-    console.log(`Trying to submit`, this.userProfileModel());
+    const docModel = toDocModel(this.userProfileModel());
     this.isSaving.set(true);
-    this.firestoreService.updateUserProfile(this.userProfileModel()).subscribe({
-      next: () => {
-        console.log('Saved!');
-        this.isSaving.set(false);
 
+    this.firestoreService.updateUserProfile(docModel).subscribe({
+      next: () => {
+        this.isSaving.set(false);
         this.openSnackBar('Profile updated', 'Ok');
       },
       error: (err: Error) => {
         this.isSaving.set(false);
-
-        console.log('Not saved!', err);
         this.openSnackBar(`Error, profile did not update: ${err.message}`, 'Ok');
       },
     });
   }
+}
+
+function toFormModel(doc: UserProfileDoc): UserProfileForm {
+  return {
+    email: doc.email ?? '',
+    displayName: doc.displayName ?? '',
+    favoriteMovie: doc.favoriteMovie ?? '',
+  };
+}
+
+export function toDocModel(form: UserProfileForm): UserProfileDoc {
+  const doc: UserProfileDoc = {};
+
+  if (form.email) doc.email = form.email;
+  if (form.displayName) doc.displayName = form.displayName;
+  if (form.favoriteMovie) doc.favoriteMovie = form.favoriteMovie;
+
+  return doc;
 }
