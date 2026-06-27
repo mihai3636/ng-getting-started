@@ -40,7 +40,22 @@ import { UserProfileForm } from './userProfile.model';
             <input matInput [formField]="userProfileForm.favoriteMovie" />
           </mat-form-field>
           <div class="form__footer">
-            <button type="submit" matButton="filled" [disabled]="isSaving()">Submit</button>
+            <mat-error>
+              @if (profileResource.error(); as err) {
+                <span>{{ err.message }}</span>
+                <button type="button" (click)="profileResource.reload()">Reload</button>
+              }
+              @if (saveError(); as err) {
+                {{ err }}
+              }
+            </mat-error>
+            <button
+              type="submit"
+              matButton="filled"
+              [disabled]="isSaving() || profileResource.error()"
+            >
+              Submit
+            </button>
           </div>
         </form>
 
@@ -66,7 +81,7 @@ import { UserProfileForm } from './userProfile.model';
 
     .form__footer {
       display: flex;
-      justify-content: end;
+      justify-content: space-between;
     }
   `,
 })
@@ -86,6 +101,8 @@ export default class ProfilePageComponent {
   });
   readonly userProfileForm = form(this.userProfileModel);
 
+  readonly saveError = signal<string>('');
+
   readonly isSaving = signal<boolean>(false);
 
   private _snackBar = inject(MatSnackBar);
@@ -93,13 +110,10 @@ export default class ProfilePageComponent {
   constructor() {
     effect(() => {
       if (!this.profileResource.hasValue()) {
-        console.log(`Effect has no value`);
         return;
       }
 
       const value = this.profileResource.value();
-      console.log('Effect changed: ', value);
-
       if (!value) return;
 
       this.userProfileModel.set(toFormModel(value));
@@ -121,6 +135,7 @@ export default class ProfilePageComponent {
   onSubmit() {
     const docModel = toDocModel(this.userProfileModel());
     this.isSaving.set(true);
+    this.saveError.set('');
 
     this.firestoreService.updateUserProfile(docModel).subscribe({
       next: () => {
@@ -129,7 +144,7 @@ export default class ProfilePageComponent {
       },
       error: (err: Error) => {
         this.isSaving.set(false);
-        this.openSnackBar(`Error, profile did not update: ${err.message}`, 'Ok');
+        this.saveError.set(err.message);
       },
     });
   }
