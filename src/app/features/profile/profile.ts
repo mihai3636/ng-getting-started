@@ -1,4 +1,4 @@
-import { Component, effect, inject, signal } from '@angular/core';
+import { Component, inject, linkedSignal, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { form, FormField } from '@angular/forms/signals';
@@ -94,11 +94,18 @@ export default class ProfilePageComponent {
     },
   });
 
-  readonly userProfileModel = signal<UserProfileForm>({
-    email: '',
-    displayName: '',
-    favoriteMovie: '',
+  readonly userProfileModel = linkedSignal<UserProfileForm>(() => {
+    const defaultModel = toFormModel({});
+
+    if (!this.profileResource.hasValue()) {
+      return defaultModel;
+    }
+
+    const value = this.profileResource.value();
+
+    return toFormModel(value);
   });
+
   readonly userProfileForm = form(this.userProfileModel);
 
   readonly saveError = signal<string>('');
@@ -107,22 +114,7 @@ export default class ProfilePageComponent {
 
   private _snackBar = inject(MatSnackBar);
 
-  constructor() {
-    effect(() => {
-      if (!this.profileResource.hasValue()) {
-        return;
-      }
-
-      const value = this.profileResource.value();
-      if (!value) return;
-
-      this.userProfileModel.set(toFormModel(value));
-    });
-
-    effect(() => {
-      console.log('Error is: ', this.profileResource.error());
-    });
-  }
+  constructor() {}
 
   private openSnackBar(message: string, action: string) {
     this._snackBar.open(message, action, {
@@ -158,7 +150,7 @@ function toFormModel(doc: UserProfileDoc): UserProfileForm {
   };
 }
 
-export function toDocModel(form: UserProfileForm): UserProfileDoc {
+function toDocModel(form: UserProfileForm): UserProfileDoc {
   const doc: UserProfileDoc = {};
 
   if (form.email) doc.email = form.email;

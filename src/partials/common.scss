@@ -18,9 +18,9 @@
   background: color-mix(in srgb, var(--mat-sys-surface) 60%, transparent);
 }
 
-.spinner {
+mat-spinner.spinner {
   position: fixed;
-  z-index: 200;
+  z-index: 300;
   top: 50%;
   left: 50%;
   transform: translateY(-50%) translateX(-50%);

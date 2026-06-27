@@ -27,11 +27,12 @@ export class FirestoreService {
     const userDocId = `user_${this.authService.getUserEmail()}`;
     const userRef = doc(this.db, this.collectionUsers, userDocId);
 
-    return from(setDoc(userRef, data, { merge: true })).pipe(
-      map(() => {
-        throw Error('Failed to update data, please try again');
-      }),
-    );
+    return from(setDoc(userRef, data, { merge: false }));
+    // .pipe(
+    //   map(() => {
+    //     throw Error('Failed to update data, please try again');
+    //   }),
+    // );
   }
 }
 
