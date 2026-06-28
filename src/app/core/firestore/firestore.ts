@@ -9,6 +9,7 @@ export class FirestoreService {
   private readonly db = getFirestore();
 
   private readonly collectionUsers = 'users';
+  private readonly collectionClients = 'clients';
 
   getUserProfile(): Observable<UserProfileDoc> {
     const userDocId = `user_${this.authService.getUserEmail()}`;
@@ -34,10 +35,25 @@ export class FirestoreService {
     //   }),
     // );
   }
+
+  createClient(data: DocClient) {
+    const docId = `client_${data.userId}_${data.firstName}_${data.lastName}`;
+    const docRef = doc(this.db, this.collectionClients, docId);
+
+    return from(setDoc(docRef, data, { merge: false }));
+  }
 }
 
 export interface UserProfileDoc {
   email?: string;
   displayName?: string;
   favoriteMovie?: string;
+}
+
+export interface DocClient {
+  email?: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  userId: string;
 }
