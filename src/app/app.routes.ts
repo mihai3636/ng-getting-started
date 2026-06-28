@@ -36,6 +36,11 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
+    path: 'clients/new',
+    loadComponent: () => import('./features/clients/client-create'),
+    canActivate: [authGuard],
+  },
+  {
     path: '**',
     redirectTo: 'login',
   },

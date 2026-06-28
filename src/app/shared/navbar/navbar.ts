@@ -36,6 +36,9 @@ import { Auth } from '../../core/auth/auth';
               <a matButton routerLink="/">Watchlist</a>
             </li> -->
             <li>
+              <a matButton routerLink="/clients/new">Add client</a>
+            </li>
+            <li>
               <a matButton routerLink="/profile" (click)="menuOpen.set(false)">Profile</a>
             </li>
             <li>
