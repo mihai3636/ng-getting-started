@@ -1,6 +1,6 @@
 import { inject, Service } from '@angular/core';
 import { doc, getDoc, getFirestore, setDoc } from 'firebase/firestore';
-import { from, map, Observable } from 'rxjs';
+import { from, map, Observable, switchMap } from 'rxjs';
 import { Auth } from '../auth/auth';
 
 @Service()
@@ -40,7 +40,12 @@ export class FirestoreService {
     const docId = `client_${data.userId}_${data.firstName}_${data.lastName}`;
     const docRef = doc(this.db, this.collectionClients, docId);
 
-    return from(setDoc(docRef, data, { merge: false }));
+    return from(getDoc(docRef)).pipe(
+      switchMap((snapshot) => {
+        if (snapshot.exists()) throw new Error('Client already exists');
+        return from(setDoc(docRef, data, { merge: false }));
+      }),
+    );
   }
 }
 

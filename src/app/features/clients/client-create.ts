@@ -1,11 +1,12 @@
-import { Component, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { debounce, email, form, FormField, pattern, required } from '@angular/forms/signals';
+import { Component, effect, inject, signal } from '@angular/core';
+import { FormsModule, NgForm } from '@angular/forms';
+import { debounce, email, form, FormField, required } from '@angular/forms/signals';
 import { MatAnchor, MatButton } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { ClientService } from '../../core/clients/client-service';
+import { SnackbarService } from '../../shared/snackbar';
 
 @Component({
   selector: 'app-client-create',
@@ -22,7 +23,7 @@ import { ClientService } from '../../core/clients/client-service';
     <section>
       <div class="container client flow-content">
         <h1 class="mat-font-display-sm">Add client</h1>
-        <form class="form" (ngSubmit)="onSubmit()">
+        <form class="form" (ngSubmit)="onSubmit(formDirective)" #formDirective="ngForm">
           <div class="form__fields">
             <mat-form-field>
               <mat-label>Email</mat-label>
@@ -43,7 +44,7 @@ import { ClientService } from '../../core/clients/client-service';
           </div>
 
           <div class="form__footer">
-            <mat-error>Something went wrong </mat-error>
+            <mat-error>{{ clientService.createClientResource.error()?.message }}</mat-error>
             <button matButton="filled" type="submit" [disabled]="!clientForm().valid()">
               Submit
             </button>
@@ -88,6 +89,15 @@ import { ClientService } from '../../core/clients/client-service';
 })
 export default class ClientCreatePage {
   readonly clientService = inject(ClientService);
+  readonly snackbar = inject(SnackbarService);
+
+  private readonly CLIENT_MODEL_DEFAULT = {
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    dateOfBirth: '',
+  };
 
   readonly clientModel = signal({
     firstName: '',
@@ -109,10 +119,25 @@ export default class ClientCreatePage {
 
     debounce(schema.phone, 200);
     required(schema.phone);
-    pattern(schema.phone, /^(\+40|0)[237]\d{8}$/, { message: 'Invalid Romanian phone number' });
+    // pattern(schema.phone, /^(\+40|0)[237]\d{8}$/, { message: 'Invalid Romanian phone number' });
   });
 
-  onSubmit() {
+  constructor() {
+    effect(() => {
+      if (this.clientService.createClientResource.status() === 'resolved') {
+        this.snackbar.openSnackBar('Client created successfully', 'Ok');
+        this.clientForm().reset({ ...this.CLIENT_MODEL_DEFAULT });
+      }
+    });
+    effect(() => {
+      if (this.clientService.createClientResource.error()?.message) {
+        this.snackbar.openSnackBar('ERROR: Client was NOT created!', 'Ok');
+      }
+    });
+  }
+
+  onSubmit(formDirective: NgForm) {
     this.clientService.addClient(this.clientModel());
+    formDirective.resetForm();
   }
 }
