@@ -1,5 +1,4 @@
 import { Component, effect, inject, signal } from '@angular/core';
-import { FormsModule, NgForm } from '@angular/forms';
 import { debounce, email, form, FormField, required } from '@angular/forms/signals';
 import { MatAnchor, MatButton } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -12,7 +11,6 @@ import { SnackbarService } from '../../shared/snackbar';
   selector: 'app-client-create',
   imports: [
     FormField,
-    FormsModule,
     MatFormFieldModule,
     MatInputModule,
     MatAnchor,
@@ -23,7 +21,7 @@ import { SnackbarService } from '../../shared/snackbar';
     <section>
       <div class="container client flow-content">
         <h1 class="mat-font-display-sm">Add client</h1>
-        <form class="form" (ngSubmit)="onSubmit(formDirective)" #formDirective="ngForm">
+        <form class="form" (submit)="onSubmit($event)">
           <div class="form__fields">
             <mat-form-field>
               <mat-label>Email</mat-label>
@@ -99,13 +97,7 @@ export default class ClientCreatePage {
     dateOfBirth: '',
   };
 
-  readonly clientModel = signal({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    dateOfBirth: '',
-  });
+  readonly clientModel = signal({ ...this.CLIENT_MODEL_DEFAULT });
 
   readonly clientForm = form(this.clientModel, (schema) => {
     debounce(schema.email, 200);
@@ -130,14 +122,15 @@ export default class ClientCreatePage {
       }
     });
     effect(() => {
+      console.log(`Error message is: ${this.clientService.createClientResource.error()?.message}`);
       if (this.clientService.createClientResource.error()?.message) {
         this.snackbar.openSnackBar('ERROR: Client was NOT created!', 'Ok');
       }
     });
   }
 
-  onSubmit(formDirective: NgForm) {
+  onSubmit(event: Event) {
+    event.preventDefault();
     this.clientService.addClient(this.clientModel());
-    formDirective.resetForm();
   }
 }

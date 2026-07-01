@@ -2,7 +2,6 @@ import { DatePipe } from '@angular/common';
 import { Component, computed, effect, inject } from '@angular/core';
 import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatIcon } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ActivatedRoute } from '@angular/router';
 import { map } from 'rxjs';
@@ -11,7 +10,7 @@ import { MovieDetails } from '../../core/movies/movie.model';
 
 @Component({
   selector: 'app-movie-details',
-  imports: [MatProgressSpinnerModule, DatePipe, MatChipsModule, MatIcon],
+  imports: [MatProgressSpinnerModule, DatePipe, MatChipsModule],
   template: `
     <section>
       <div class="container">
