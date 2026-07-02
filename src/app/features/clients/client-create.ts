@@ -1,6 +1,7 @@
 import { Component, effect, inject, signal } from '@angular/core';
 import { debounce, email, form, FormField, required } from '@angular/forms/signals';
-import { MatAnchor, MatButton } from '@angular/material/button';
+import { MatButton } from '@angular/material/button';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
@@ -13,9 +14,9 @@ import { SnackbarService } from '../../shared/snackbar';
     FormField,
     MatFormFieldModule,
     MatInputModule,
-    MatAnchor,
     MatButton,
     MatProgressSpinner,
+    MatDatepickerModule,
   ],
   template: `
     <section>
@@ -38,6 +39,13 @@ import { SnackbarService } from '../../shared/snackbar';
             <mat-form-field>
               <mat-label>Phone</mat-label>
               <input matInput [formField]="clientForm.phone" />
+            </mat-form-field>
+            <mat-form-field>
+              <mat-label>Choose a date</mat-label>
+              <input matInput [matDatepicker]="picker" [formField]="clientForm.dateOfBirth" />
+              <mat-hint>DD/MM/YYYY</mat-hint>
+              <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+              <mat-datepicker #picker></mat-datepicker>
             </mat-form-field>
           </div>
 

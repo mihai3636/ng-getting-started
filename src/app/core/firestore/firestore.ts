@@ -61,4 +61,5 @@ export interface DocClient {
   lastName: string;
   phone: string;
   userId: string;
+  dateOfBirth: string;
 }

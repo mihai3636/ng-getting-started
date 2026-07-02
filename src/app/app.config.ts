@@ -9,6 +9,7 @@ import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { routes } from './app.routes';
 
+import { MAT_DATE_LOCALE, provideNativeDateAdapter } from '@angular/material/core';
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
@@ -23,6 +24,8 @@ export const appConfig: ApplicationConfig = {
     provideAppInitializer(() => {
       return inject(Auth).whenReady();
     }),
+    provideNativeDateAdapter(),
+    { provide: MAT_DATE_LOCALE, useValue: 'en-GB' },
   ],
 };
 
