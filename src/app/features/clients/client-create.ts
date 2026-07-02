@@ -102,7 +102,7 @@ export default class ClientCreatePage {
     lastName: '',
     email: '',
     phone: '',
-    dateOfBirth: '',
+    dateOfBirth: null,
   };
 
   readonly clientModel = signal({ ...this.CLIENT_MODEL_DEFAULT });

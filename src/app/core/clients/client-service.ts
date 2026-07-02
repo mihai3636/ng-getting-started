@@ -36,5 +36,5 @@ export interface UiClient {
   firstName: string;
   lastName: string;
   phone: string;
-  dateOfBirth: string;
+  dateOfBirth: Date | null;
 }
