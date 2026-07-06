@@ -1,6 +1,6 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { EMPTY } from 'rxjs';
+import { delay, map } from 'rxjs';
 import { Auth } from '../auth/auth';
 import { DocClient, FirestoreService } from '../firestore/firestore';
 
@@ -18,10 +18,19 @@ export class ClientService {
   readonly createClientResource = rxResource({
     params: () => this.createClientRequest(),
     stream: ({ params }) => {
-      if (!params) return EMPTY;
+      console.log('createClientResource params: ', params);
+      // The loader does not fire when params is undefined!
+      // if (!params) {
+      //   console.log('Returning empty observable');
+      //   return EMPTY;
+      // }
       return this.firestoreService.createClient(params.data);
     },
   });
+
+  resetClientRequest() {
+    this.createClientRequest.set(undefined);
+  }
 
   addClient(clientForm: UiClient) {
     const userId = this.auth.currentUser()?.uid!!;
@@ -29,9 +38,29 @@ export class ClientService {
 
     this.createClientRequest.set({ data: clientDoc, ts: Date.now() });
   }
+
+  getClients() {
+    const userId = this.auth.currentUser()?.uid!!;
+    return this.firestoreService.getClients(userId).pipe(
+      map((docs) => docs.map((fsDoc) => ({ id: fsDoc.id, ...fsDoc.data }) as UiClientItem)),
+      delay(2000),
+      // map((docs) => {
+      //   throw Error('Test error');
+      // }),
+    );
+  }
 }
 
 export interface UiClient {
+  email: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  dateOfBirth: Date | null;
+}
+
+export interface UiClientItem {
+  id: string;
   email: string;
   firstName: string;
   lastName: string;

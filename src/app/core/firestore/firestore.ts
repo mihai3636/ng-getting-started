@@ -1,5 +1,14 @@
 import { inject, Service } from '@angular/core';
-import { doc, getDoc, getFirestore, setDoc } from 'firebase/firestore';
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  getFirestore,
+  query,
+  setDoc,
+  where,
+} from 'firebase/firestore';
 import { from, map, Observable, switchMap } from 'rxjs';
 import { Auth } from '../auth/auth';
 
@@ -47,6 +56,23 @@ export class FirestoreService {
       }),
     );
   }
+
+  getClients(userId: string): Observable<FirestoreDoc<DocClient>[]> {
+    const clientsRef = collection(this.db, this.collectionClients);
+
+    const q = query(clientsRef, where('userId', '==', userId));
+
+    return from(getDocs(q)).pipe(
+      map((snapshot) => {
+        return snapshot.docs.map((d) => {
+          return {
+            id: d.id,
+            data: d.data() as DocClient,
+          };
+        });
+      }),
+    );
+  }
 }
 
 export interface UserProfileDoc {
@@ -62,4 +88,9 @@ export interface DocClient {
   phone: string;
   userId: string;
   dateOfBirth: Date | null;
+}
+
+export interface FirestoreDoc<T> {
+  id: string;
+  data: T;
 }

@@ -49,3 +49,5 @@ environment.ts
 # AI
 AGENTS.md
 CLAUDE.md
+.agents/
+.claude/
