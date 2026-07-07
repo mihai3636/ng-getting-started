@@ -13,13 +13,13 @@ import { ClientService } from '../../core/clients/client-service';
         @if (clientsResource.isLoading()) {
           <p>Loading...</p>
         }
+        @if (clientsResource.error()) {
+          <p>Something went wrong: {{ clientsResource.error()?.message }}</p>
+        }
         @if (clientsResource.hasValue()) {
           @for (client of clientsResource.value(); track client.id) {
             <h2>{{ client.lastName }} {{ client.firstName }}</h2>
           }
-        }
-        @if (clientsResource.error()) {
-          <p>Something went wrong: {{ clientsResource.error()?.message }}</p>
         }
       </div>
     </section>
