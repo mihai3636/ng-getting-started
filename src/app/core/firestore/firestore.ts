@@ -2,15 +2,31 @@ import { inject, Service } from '@angular/core';
 import {
   collection,
   doc,
+  FirestoreDataConverter,
   getDoc,
   getDocs,
   getFirestore,
   query,
   setDoc,
+  Timestamp,
   where,
 } from 'firebase/firestore';
 import { from, map, Observable, switchMap } from 'rxjs';
 import { Auth } from '../auth/auth';
+
+const docClientConverter: FirestoreDataConverter<DocClient> = {
+  toFirestore(client: DocClient) {
+    return { ...client };
+  },
+
+  fromFirestore(snapshot, options) {
+    const data = snapshot.data(options);
+    return {
+      ...data,
+      dateOfBirth: data['dateOfBirth'] ? (data['dateOfBirth'] as Timestamp).toDate() : null,
+    } as DocClient;
+  },
+};
 
 @Service()
 export class FirestoreService {
@@ -58,7 +74,9 @@ export class FirestoreService {
   }
 
   getClients(userId: string): Observable<FirestoreDoc<DocClient>[]> {
-    const clientsRef = collection(this.db, this.collectionClients);
+    const clientsRef = collection(this.db, this.collectionClients).withConverter(
+      docClientConverter,
+    );
 
     const q = query(clientsRef, where('userId', '==', userId));
 
