@@ -1,12 +1,12 @@
 import { Component, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { Auth } from '../../core/auth/auth';
 
 @Component({
   selector: 'app-navbar',
-  imports: [MatIconModule, MatButtonModule, RouterLink],
+  imports: [MatIconModule, MatButtonModule, RouterLink, RouterLinkActive],
   template: ` <section class="section section--header">
     <div class="container">
       <nav class="nav">
@@ -18,12 +18,19 @@ import { Auth } from '../../core/auth/auth';
         @if (authService.currentUser()) {
           <ul class="nav__links" [class.open]="menuOpen()">
             <li>
-              <a matButton routerLink="/home" (click)="menuOpen.set(false)">Home</a>
+              <a
+                matButton
+                routerLink="/home"
+                routerLinkActive="active-link"
+                (click)="menuOpen.set(false)"
+                >Home</a
+              >
             </li>
             <li>
               <a
                 matButton
                 routerLink="/browse"
+                routerLinkActive="active-link"
                 [queryParams]="{ page: 1, q: '' }"
                 (click)="menuOpen.set(false)"
                 >Browse</a
@@ -36,10 +43,22 @@ import { Auth } from '../../core/auth/auth';
               <a matButton routerLink="/">Watchlist</a>
             </li> -->
             <li>
-              <a matButton routerLink="/clients/new">Add client</a>
+              <a
+                matButton
+                routerLink="/clients/new"
+                routerLinkActive="active-link"
+                (click)="menuOpen.set(false)"
+                >Add client</a
+              >
             </li>
             <li>
-              <a matButton routerLink="/profile" (click)="menuOpen.set(false)">Profile</a>
+              <a
+                matButton
+                routerLink="/profile"
+                routerLinkActive="active-link"
+                (click)="menuOpen.set(false)"
+                >Profile</a
+              >
             </li>
             <li>
               <button matButton (click)="logOut()" (click)="menuOpen.set(false)">Log out</button>
@@ -115,6 +134,10 @@ import { Auth } from '../../core/auth/auth';
       @media (min-width: $bp-desktop) {
         display: none;
       }
+    }
+
+    .active-link {
+      background: color-mix(in srgb, var(--mat-sys-primary) 10%, transparent);
     }
   `,
 })
