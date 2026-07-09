@@ -96,6 +96,13 @@ import { ClientService, UiClientItem } from '../../core/clients/client-service';
     .container {
       position: relative;
     }
+
+    .mat-column-firstName,
+    .mat-column-lastName,
+    .mat-column-dateOfBirth,
+    .mat-column-email {
+      width: 25%;
+    }
   `,
 })
 export class HomePageComponent {
