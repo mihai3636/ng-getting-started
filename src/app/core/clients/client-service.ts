@@ -80,6 +80,12 @@ export class ClientService {
       // }),
     );
   }
+
+  getCount() {
+    const userId = this.auth.currentUser()?.uid!!;
+
+    return this.firestoreService.getClientsCount(userId);
+  }
 }
 
 export interface UiClient {

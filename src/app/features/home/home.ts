@@ -1,5 +1,13 @@
 import { DatePipe } from '@angular/common';
-import { Component, effect, inject, linkedSignal, ResourceRef, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  inject,
+  linkedSignal,
+  ResourceRef,
+  signal,
+} from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -19,26 +27,18 @@ import { ClientService, UiClientItem } from '../../core/clients/client-service';
         @if (clientsResource.error()) {
           <p>Something went wrong: {{ clientsResource.error()?.message }}</p>
         }
-        <!-- @if (clientsResource.hasValue()) {
-          @for (client of clientsResource.value(); track client.id) {
-            <h2>{{ client.lastName }} {{ client.firstName }}</h2>
-          }
-        } -->
 
         <table mat-table [dataSource]="clients()" class="mat-shadow-2">
-          <!-- Position Column -->
           <ng-container matColumnDef="firstName">
             <th mat-header-cell *matHeaderCellDef>First Name</th>
             <td mat-cell *matCellDef="let element">{{ element.firstName }}</td>
           </ng-container>
 
-          <!-- Name Column -->
           <ng-container matColumnDef="lastName">
             <th mat-header-cell *matHeaderCellDef>Last Name</th>
             <td mat-cell *matCellDef="let element">{{ element.lastName }}</td>
           </ng-container>
 
-          <!-- Weight Column -->
           <ng-container matColumnDef="dateOfBirth">
             <th mat-header-cell *matHeaderCellDef>Date of birth</th>
             <td mat-cell *matCellDef="let element">
@@ -46,7 +46,6 @@ import { ClientService, UiClientItem } from '../../core/clients/client-service';
             </td>
           </ng-container>
 
-          <!-- Symbol Column -->
           <ng-container matColumnDef="email">
             <th mat-header-cell *matHeaderCellDef>Email</th>
             <td mat-cell *matCellDef="let element">{{ element.email }}</td>
@@ -55,14 +54,13 @@ import { ClientService, UiClientItem } from '../../core/clients/client-service';
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
           <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
 
-          <!-- Row shown when there is no matching data. -->
           <tr class="mat-row" *matNoDataRow>
             <td class="mat-cell" colspan="4">No data available</td>
           </tr>
         </table>
         <mat-paginator
           [pageSize]="3"
-          [length]="20"
+          [length]="count()"
           [hidePageSize]="true"
           [showFirstLastButtons]="false"
           (page)="handlePageEvent($event)"
@@ -124,6 +122,20 @@ export class HomePageComponent {
 
       return this.clientService.getNextPage(params.pageEvent.pageSize, this.clients());
     },
+  });
+
+  countResource = rxResource({
+    stream: () => {
+      return this.clientService.getCount();
+    },
+  });
+
+  count = computed(() => {
+    try {
+      return this.countResource.value();
+    } catch (err) {
+      return 0;
+    }
   });
 
   clients = linkedSignal<UiClientItem[] | undefined, UiClientItem[]>({

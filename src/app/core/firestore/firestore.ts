@@ -4,6 +4,7 @@ import {
   doc,
   endBefore,
   FirestoreDataConverter,
+  getCountFromServer,
   getDoc,
   getDocs,
   getFirestore,
@@ -160,6 +161,13 @@ export class FirestoreService {
         });
       }),
     );
+  }
+
+  getClientsCount(userId: string): Observable<number> {
+    const clientsRef = collection(this.db, this.collectionClients);
+    const q = query(clientsRef, where('userId', '==', userId));
+
+    return from(getCountFromServer(q)).pipe(map((snapshot) => snapshot.data().count));
   }
 }
 
