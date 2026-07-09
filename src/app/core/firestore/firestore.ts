@@ -2,17 +2,24 @@ import { inject, Service } from '@angular/core';
 import {
   collection,
   doc,
+  endBefore,
   FirestoreDataConverter,
   getDoc,
   getDocs,
   getFirestore,
+  limit,
+  limitToLast,
+  orderBy,
   query,
+  QueryConstraint,
   setDoc,
+  startAfter,
   Timestamp,
   where,
 } from 'firebase/firestore';
 import { from, map, Observable, switchMap } from 'rxjs';
 import { Auth } from '../auth/auth';
+import { UiClientItem } from '../clients/client-service';
 
 const docClientConverter: FirestoreDataConverter<DocClient> = {
   toFirestore(client: DocClient) {
@@ -86,6 +93,69 @@ export class FirestoreService {
           return {
             id: d.id,
             data: d.data() as DocClient,
+          };
+        });
+      }),
+    );
+  }
+
+  getClientsPageNext(
+    userId: string,
+    pageSize: number,
+    cursor?: UiClientItem,
+  ): Observable<FirestoreDoc<DocClient>[]> {
+    const clientsRef = collection(this.db, this.collectionClients).withConverter(
+      docClientConverter,
+    );
+
+    const constraints: QueryConstraint[] = [
+      where('userId', '==', userId),
+      orderBy('lastName'),
+      orderBy('__name__'),
+    ];
+    if (cursor) constraints.push(startAfter(cursor.lastName, cursor.id));
+
+    constraints.push(limit(pageSize));
+
+    const q = query(clientsRef, ...constraints);
+
+    return from(getDocs(q)).pipe(
+      map((snapshot) => {
+        return snapshot.docs.map((d) => {
+          return {
+            id: d.id,
+            data: d.data(),
+          };
+        });
+      }),
+    );
+  }
+
+  getClientsPagePrev(
+    userId: string,
+    pageSize: number,
+    cursor: UiClientItem,
+  ): Observable<FirestoreDoc<DocClient>[]> {
+    const clientsRef = collection(this.db, this.collectionClients).withConverter(
+      docClientConverter,
+    );
+
+    const constraints: QueryConstraint[] = [
+      where('userId', '==', userId),
+      orderBy('lastName'),
+      orderBy('__name__'),
+      endBefore(cursor.lastName, cursor.id),
+      limitToLast(pageSize),
+    ];
+
+    const q = query(clientsRef, ...constraints);
+
+    return from(getDocs(q)).pipe(
+      map((snapshot) => {
+        return snapshot.docs.map((d) => {
+          return {
+            id: d.id,
+            data: d.data(),
           };
         });
       }),

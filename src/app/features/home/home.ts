@@ -1,13 +1,14 @@
 import { DatePipe } from '@angular/common';
-import { Component, computed, effect, inject } from '@angular/core';
+import { Component, effect, inject, linkedSignal, ResourceRef, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
 import { ClientService, UiClientItem } from '../../core/clients/client-service';
 
 @Component({
   selector: 'app-home',
-  imports: [MatTableModule, DatePipe, MatProgressSpinnerModule],
+  imports: [MatTableModule, DatePipe, MatProgressSpinnerModule, MatPaginatorModule],
   template: `
     <section>
       <div class="container">
@@ -59,6 +60,16 @@ import { ClientService, UiClientItem } from '../../core/clients/client-service';
             <td class="mat-cell" colspan="4">No data available</td>
           </tr>
         </table>
+        <mat-paginator
+          [pageSize]="3"
+          [length]="20"
+          [hidePageSize]="true"
+          [showFirstLastButtons]="false"
+          (page)="handlePageEvent($event)"
+          showFirstLastButtons
+          aria-label="Select page of periodic elements"
+        >
+        </mat-paginator>
       </div>
     </section>
     <!-- <section>
@@ -93,22 +104,48 @@ export class HomePageComponent {
   displayedColumns: string[] = ['firstName', 'lastName', 'dateOfBirth', 'email'];
   private readonly clientService = inject(ClientService);
 
-  clientsResource = rxResource({
-    stream: () => this.clientService.getClients(),
+  pageEvent = signal<PageEvent>({
+    previousPageIndex: undefined,
+    pageIndex: 0,
+    pageSize: 3,
+    length: 20,
   });
 
-  clients = computed<UiClientItem[]>(() => {
-    try {
-      return this.clientsResource.value() ?? [];
-    } catch (err) {
-      console.log(`Something went wrong: ${err}`);
-      return [];
-    }
+  clientsResource: ResourceRef<UiClientItem[] | undefined> = rxResource({
+    params: () => ({ pageEvent: this.pageEvent() }),
+    stream: ({ params }) => {
+      if (params.pageEvent.previousPageIndex === undefined) {
+        return this.clientService.getNextPage(params.pageEvent.pageSize, []);
+      }
+
+      if (params.pageEvent.previousPageIndex > params.pageEvent.pageIndex) {
+        return this.clientService.getPrevPage(params.pageEvent.pageSize, this.clients());
+      }
+
+      return this.clientService.getNextPage(params.pageEvent.pageSize, this.clients());
+    },
+  });
+
+  clients = linkedSignal<UiClientItem[] | undefined, UiClientItem[]>({
+    source: () => {
+      try {
+        return this.clientsResource.value();
+      } catch (err) {
+        console.log('LinkedSignal got error: ', err);
+        return [];
+      }
+    },
+    computation: (source, previous) => source ?? previous?.value ?? [],
   });
 
   constructor() {
     effect(() => {
       this.clients().forEach((client) => console.log(client.dateOfBirth));
     });
+  }
+
+  handlePageEvent(event: PageEvent) {
+    console.log(event);
+    this.pageEvent.set(event);
   }
 }

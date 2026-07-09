@@ -1,6 +1,6 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { delay, map } from 'rxjs';
+import { delay, map, tap } from 'rxjs';
 import { Auth } from '../auth/auth';
 import { DocClient, FirestoreService } from '../firestore/firestore';
 
@@ -44,6 +44,37 @@ export class ClientService {
     return this.firestoreService.getClients(userId).pipe(
       map((docs) => docs.map((fsDoc) => ({ id: fsDoc.id, ...fsDoc.data }) as UiClientItem)),
       delay(2000),
+      // map((docs) => {
+      //   throw Error('Test error');
+      // }),
+    );
+  }
+
+  getNextPage(pageSize: number, currentPage: UiClientItem[]) {
+    const userId = this.auth.currentUser()?.uid!!;
+    const cursor = currentPage.at(-1);
+
+    return this.firestoreService.getClientsPageNext(userId, pageSize, cursor).pipe(
+      map((docs) => docs.map((fsDoc) => ({ id: fsDoc.id, ...fsDoc.data }) as UiClientItem)),
+      tap((data) => console.log('Received data: ', data)),
+      // delay(2000),
+      // map((docs) => {
+      //   throw Error('Test error');
+      // }),
+    );
+  }
+
+  getPrevPage(pageSize: number, currentPage: UiClientItem[]) {
+    const userId = this.auth.currentUser()?.uid!!;
+    const cursor = currentPage.at(0);
+
+    if (!cursor)
+      throw new Error('You cannot fetch prev page without providing first item of the currentPage');
+
+    return this.firestoreService.getClientsPagePrev(userId, pageSize, cursor).pipe(
+      map((docs) => docs.map((fsDoc) => ({ id: fsDoc.id, ...fsDoc.data }) as UiClientItem)),
+      tap((data) => console.log('Received data: ', data)),
+      // delay(2000),
       // map((docs) => {
       //   throw Error('Test error');
       // }),
