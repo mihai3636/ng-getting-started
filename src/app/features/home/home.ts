@@ -62,7 +62,7 @@ import { ClientService, UiClientItem } from '../../core/clients/client-service';
           [pageSize]="3"
           [length]="count()"
           [hidePageSize]="true"
-          [showFirstLastButtons]="false"
+          [showFirstLastButtons]="true"
           (page)="handlePageEvent($event)"
           showFirstLastButtons
           aria-label="Select page of periodic elements"
@@ -119,12 +119,25 @@ export class HomePageComponent {
   clientsResource: ResourceRef<UiClientItem[] | undefined> = rxResource({
     params: () => ({ pageEvent: this.pageEvent() }),
     stream: ({ params }) => {
-      if (params.pageEvent.previousPageIndex === undefined) {
+      const prevPageIndex = params.pageEvent.previousPageIndex;
+      const pageIndex = params.pageEvent.pageIndex;
+      const pageSize = params.pageEvent.pageSize;
+      const total = params.pageEvent.length;
+
+      if (prevPageIndex === undefined) {
         return this.clientService.getNextPage(params.pageEvent.pageSize, []);
       }
 
-      if (params.pageEvent.previousPageIndex > params.pageEvent.pageIndex) {
+      if (prevPageIndex - pageIndex > 1) {
+        return this.clientService.getNextPage(params.pageEvent.pageSize, []);
+      }
+
+      if (prevPageIndex > pageIndex) {
         return this.clientService.getPrevPage(params.pageEvent.pageSize, this.clients());
+      }
+
+      if (pageIndex - prevPageIndex > 1) {
+        return this.clientService.getLastPage(pageSize, total);
       }
 
       return this.clientService.getNextPage(params.pageEvent.pageSize, this.clients());

@@ -163,6 +163,31 @@ export class FirestoreService {
     );
   }
 
+  getClientsPageLast(
+    userId: string,
+    pageSize: number,
+    totalCount: number,
+  ): Observable<FirestoreDoc<DocClient>[]> {
+    const clientsRef = collection(this.db, this.collectionClients).withConverter(
+      docClientConverter,
+    );
+
+    const itemsOnLastPage = totalCount % pageSize === 0 ? pageSize : totalCount % pageSize;
+
+    const constraints: QueryConstraint[] = [
+      where('userId', '==', userId),
+      orderBy('lastName'),
+      orderBy('__name__'),
+      limitToLast(itemsOnLastPage),
+    ];
+
+    const q = query(clientsRef, ...constraints);
+
+    return from(getDocs(q)).pipe(
+      map((snapshot) => snapshot.docs.map((d) => ({ id: d.id, data: d.data() }))),
+    );
+  }
+
   getClientsCount(userId: string): Observable<number> {
     const clientsRef = collection(this.db, this.collectionClients);
     const q = query(clientsRef, where('userId', '==', userId));

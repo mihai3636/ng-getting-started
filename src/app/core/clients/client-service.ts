@@ -81,6 +81,15 @@ export class ClientService {
     );
   }
 
+  getLastPage(pageSize: number, total: number) {
+    const userId = this.auth.currentUser()?.uid!!;
+
+    return this.firestoreService.getClientsPageLast(userId, pageSize, total).pipe(
+      map((docs) => docs.map((fsDoc) => ({ id: fsDoc.id, ...fsDoc.data }) as UiClientItem)),
+      tap((data) => console.log('Received data: ', data)),
+    );
+  }
+
   getCount() {
     const userId = this.auth.currentUser()?.uid!!;
 
