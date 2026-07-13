@@ -18,12 +18,6 @@ export class ClientService {
   readonly createClientResource = rxResource({
     params: () => this.createClientRequest(),
     stream: ({ params }) => {
-      console.log('createClientResource params: ', params);
-      // The loader does not fire when params is undefined!
-      // if (!params) {
-      //   console.log('Returning empty observable');
-      //   return EMPTY;
-      // }
       return this.firestoreService.createClient(params.data);
     },
   });
