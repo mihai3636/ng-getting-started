@@ -1,13 +1,5 @@
 import { DatePipe } from '@angular/common';
-import {
-  Component,
-  computed,
-  effect,
-  inject,
-  linkedSignal,
-  ResourceRef,
-  signal,
-} from '@angular/core';
+import { Component, computed, inject, linkedSignal, ResourceRef, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { debounce, form, FormField } from '@angular/forms/signals';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -79,8 +71,9 @@ import { ClientService, UiClientItem } from '../../core/clients/client-service';
           </tr>
         </table>
         <mat-paginator
-          [pageSize]="3"
+          [pageSize]="page().pageSize"
           [length]="count()"
+          [pageIndex]="page().pageIndex"
           [hidePageSize]="true"
           [showFirstLastButtons]="true"
           (page)="handlePageEvent($event)"
@@ -129,38 +122,39 @@ export class HomePageComponent {
   displayedColumns: string[] = ['firstName', 'lastName', 'dateOfBirth', 'email'];
   private readonly clientService = inject(ClientService);
 
-  pageEvent = signal<PageEvent>({
+  private readonly PAGE_EVENT_DEFAULT_MODEL: PageEvent = {
     previousPageIndex: undefined,
     pageIndex: 0,
-    pageSize: 3,
-    length: 20,
-  });
+    pageSize: 2,
+    length: 0,
+  };
 
   clientsResource: ResourceRef<UiClientItem[] | undefined> = rxResource({
-    params: () => ({ pageEvent: this.pageEvent() }),
+    params: () => ({ page: this.page() }),
     stream: ({ params }) => {
-      const prevPageIndex = params.pageEvent.previousPageIndex;
-      const pageIndex = params.pageEvent.pageIndex;
-      const pageSize = params.pageEvent.pageSize;
-      const total = params.pageEvent.length;
+      const prevPageIndex = params.page.previousPageIndex;
+      const pageIndex = params.page.pageIndex;
+      const pageSize = params.page.pageSize;
+      const total = params.page.length;
+      const query = params.page.query;
 
       if (prevPageIndex === undefined) {
-        return this.clientService.getNextPage(params.pageEvent.pageSize, []);
+        return this.clientService.getNextPage(pageSize, [], query);
       }
 
       if (prevPageIndex - pageIndex > 1) {
-        return this.clientService.getNextPage(params.pageEvent.pageSize, []);
+        return this.clientService.getNextPage(pageSize, [], query);
       }
 
       if (prevPageIndex > pageIndex) {
-        return this.clientService.getPrevPage(params.pageEvent.pageSize, this.clients());
+        return this.clientService.getPrevPage(pageSize, this.clients());
       }
 
       if (pageIndex - prevPageIndex > 1) {
         return this.clientService.getLastPage(pageSize, total);
       }
 
-      return this.clientService.getNextPage(params.pageEvent.pageSize, this.clients());
+      return this.clientService.getNextPage(pageSize, this.clients(), query);
     },
   });
 
@@ -179,6 +173,13 @@ export class HomePageComponent {
     }
   });
 
+  page = linkedSignal(() => {
+    return {
+      ...this.PAGE_EVENT_DEFAULT_MODEL,
+      query: this.searchForm.query().value(),
+    };
+  });
+
   clients = linkedSignal<UiClientItem[] | undefined, UiClientItem[]>({
     source: () => {
       try {
@@ -194,22 +195,18 @@ export class HomePageComponent {
   private readonly SEARCH_MODEL_DEFAULT = { query: '' };
   readonly searchModel = signal<SearchData>(this.SEARCH_MODEL_DEFAULT);
   readonly searchForm = form(this.searchModel, (schemaPath) => {
-    debounce(schemaPath.query, 500);
+    debounce(schemaPath.query, 800);
   });
 
-  constructor() {
-    effect(() => {
-      this.clients().forEach((client) => console.log(client.dateOfBirth));
-    });
-
-    effect(() => {
-      console.log(this.searchForm.query().value());
-    });
-  }
+  constructor() {}
 
   handlePageEvent(event: PageEvent) {
     console.log(event);
-    this.pageEvent.set(event);
+
+    this.page.set({
+      ...event,
+      query: this.searchForm.query().value(),
+    });
   }
 }
 

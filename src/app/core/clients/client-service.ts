@@ -44,11 +44,11 @@ export class ClientService {
     );
   }
 
-  getNextPage(pageSize: number, currentPage: UiClientItem[]) {
+  getNextPage(pageSize: number, currentPage: UiClientItem[], lastName: string = '') {
     const userId = this.auth.currentUser()?.uid!!;
     const cursor = currentPage.at(-1);
 
-    return this.firestoreService.getClientsPageNext(userId, pageSize, cursor).pipe(
+    return this.firestoreService.getClientsPageNext(userId, pageSize, cursor, lastName).pipe(
       map((docs) => docs.map((fsDoc) => ({ id: fsDoc.id, ...fsDoc.data }) as UiClientItem)),
       tap((data) => console.log('Received data: ', data)),
       // delay(2000),
