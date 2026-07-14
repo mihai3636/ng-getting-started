@@ -9,6 +9,10 @@ import {
   signal,
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { debounce, form, FormField } from '@angular/forms/signals';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIcon } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
@@ -16,7 +20,16 @@ import { ClientService, UiClientItem } from '../../core/clients/client-service';
 
 @Component({
   selector: 'app-home',
-  imports: [MatTableModule, DatePipe, MatProgressSpinnerModule, MatPaginatorModule],
+  imports: [
+    MatTableModule,
+    DatePipe,
+    MatProgressSpinnerModule,
+    MatPaginatorModule,
+    FormField,
+    MatFormFieldModule,
+    MatInputModule,
+    MatIcon,
+  ],
   template: `
     <section>
       <div class="container">
@@ -27,6 +40,13 @@ import { ClientService, UiClientItem } from '../../core/clients/client-service';
         @if (clientsResource.error()) {
           <p>Something went wrong: {{ clientsResource.error()?.message }}</p>
         }
+        <form>
+          <mat-form-field>
+            <mat-label>Search</mat-label>
+            <input matInput type="text" [formField]="searchForm.query" />
+            <mat-icon matSuffix>search</mat-icon>
+          </mat-form-field>
+        </form>
 
         <table mat-table [dataSource]="clients()" class="mat-shadow-2">
           <ng-container matColumnDef="firstName">
@@ -145,8 +165,9 @@ export class HomePageComponent {
   });
 
   countResource = rxResource({
-    stream: () => {
-      return this.clientService.getCount();
+    params: () => ({ query: this.searchForm.query().value() }),
+    stream: ({ params }) => {
+      return this.clientService.getCount(params.query);
     },
   });
 
@@ -170,9 +191,19 @@ export class HomePageComponent {
     computation: (source, previous) => source ?? previous?.value ?? [],
   });
 
+  private readonly SEARCH_MODEL_DEFAULT = { query: '' };
+  readonly searchModel = signal<SearchData>(this.SEARCH_MODEL_DEFAULT);
+  readonly searchForm = form(this.searchModel, (schemaPath) => {
+    debounce(schemaPath.query, 500);
+  });
+
   constructor() {
     effect(() => {
       this.clients().forEach((client) => console.log(client.dateOfBirth));
+    });
+
+    effect(() => {
+      console.log(this.searchForm.query().value());
     });
   }
 
@@ -180,4 +211,8 @@ export class HomePageComponent {
     console.log(event);
     this.pageEvent.set(event);
   }
+}
+
+interface SearchData {
+  query: string;
 }

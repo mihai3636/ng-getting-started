@@ -104,6 +104,7 @@ export class FirestoreService {
     userId: string,
     pageSize: number,
     cursor?: UiClientItem,
+    lastName: string = '',
   ): Observable<FirestoreDoc<DocClient>[]> {
     const clientsRef = collection(this.db, this.collectionClients).withConverter(
       docClientConverter,
@@ -111,6 +112,8 @@ export class FirestoreService {
 
     const constraints: QueryConstraint[] = [
       where('userId', '==', userId),
+      where('lastName', '>=', lastName),
+      where('lastName', '<', lastName + '\uf8ff'),
       orderBy('lastName'),
       orderBy('__name__'),
     ];
@@ -188,9 +191,14 @@ export class FirestoreService {
     );
   }
 
-  getClientsCount(userId: string): Observable<number> {
+  getClientsCount(userId: string, lastName: string = ''): Observable<number> {
     const clientsRef = collection(this.db, this.collectionClients);
-    const q = query(clientsRef, where('userId', '==', userId));
+    const q = query(
+      clientsRef,
+      where('userId', '==', userId),
+      where('lastName', '>=', lastName),
+      where('lastName', '<', lastName + '\uf8ff'),
+    );
 
     return from(getCountFromServer(q)).pipe(map((snapshot) => snapshot.data().count));
   }

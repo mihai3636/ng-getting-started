@@ -84,10 +84,10 @@ export class ClientService {
     );
   }
 
-  getCount() {
+  getCount(lastName: string = '') {
     const userId = this.auth.currentUser()?.uid!!;
 
-    return this.firestoreService.getClientsCount(userId);
+    return this.firestoreService.getClientsCount(userId, lastName);
   }
 }
 
